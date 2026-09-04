@@ -53,6 +53,7 @@ Panel {
   property string focusSection: "scale"
   property int selectedIndex: 0
   property bool cursorActive: false
+  property bool awaitingSecondG: false
 
   // Text size slider — curated macOS-style notches (px). The panel snaps to
   // these stops; the CLI (omarchy-display-text-size) accepts any integer in range.
@@ -127,6 +128,49 @@ Panel {
         selectedIndex = sectionIsSingleRow(prev) ? sectionFirstIndex(prev) : sectionCount(prev) - 1
       }
     }
+  }
+
+  function cancelVimPrefix() {
+    awaitingSecondG = false
+    vimPrefixTimer.stop()
+  }
+
+  function moveCursorToStart() {
+    cancelVimPrefix()
+    var sections = visibleSections
+    if (!sections || sections.length === 0) return
+    focusSection = sections[0]
+    selectedIndex = sectionFirstIndex(focusSection)
+    cursorActive = true
+  }
+
+  function moveCursorToEnd() {
+    cancelVimPrefix()
+    var sections = visibleSections
+    if (!sections || sections.length === 0) return
+    focusSection = sections[sections.length - 1]
+    selectedIndex = sectionIsSingleRow(focusSection)
+      ? sectionFirstIndex(focusSection)
+      : Math.max(0, sectionCount(focusSection) - 1)
+    cursorActive = true
+  }
+
+  function handleVimBoundaryMotion(text) {
+    if (text === "G") {
+      moveCursorToEnd()
+      return true
+    }
+    if (text !== "g") {
+      cancelVimPrefix()
+      return false
+    }
+    if (awaitingSecondG) {
+      moveCursorToStart()
+    } else {
+      awaitingSecondG = true
+      vimPrefixTimer.restart()
+    }
+    return true
   }
 
   // h/l: in scale section, walks the preset row; everywhere else, no-op
@@ -355,6 +399,7 @@ Panel {
   // with j/k ready to navigate. Keep a default landing point, but don't paint
   // the cursor until hover or the first navigation key.
   onOpenedChanged: {
+    cancelVimPrefix()
     if (opened) {
       refresh()
       if (brightnessAvailable) {
@@ -366,6 +411,12 @@ Panel {
       }
       cursorActive = false
     }
+  }
+
+  Timer {
+    id: vimPrefixTimer
+    interval: 1000
+    onTriggered: root.awaitingSecondG = false
   }
 
   onBrightnessAvailableChanged: clampCursor()
@@ -501,6 +552,7 @@ Panel {
       id: keyCatcher
       anchors.fill: parent
       onMoveRequested: function(dx, dy) {
+        root.cancelVimPrefix()
         if (!root.cursorActive) { root.cursorActive = true; return }
         if (dy !== 0) root.moveCursor(dy)
         else if (dx !== 0) {
@@ -513,6 +565,7 @@ Panel {
       onCloseRequested: root.close()
       onTabRequested: function(direction) { root.switchPanel(direction) }
       onTextKey: function(t) {
+        if (root.handleVimBoundaryMotion(t)) return
         if (t === "q" || t === "Q") root.close()
       }
 

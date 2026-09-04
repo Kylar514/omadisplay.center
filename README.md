@@ -2,7 +2,8 @@
 
 Omarchy's display bar widget with its popup centered on the active display.
 Brightness, text sizing, scaling, and monitor controls remain synchronized
-with the built-in implementation.
+with the built-in implementation. `q` closes the panel, while `gg` and `G`
+jump to the first and last selectable rows.
 
 ## Install
 

@@ -1,10 +1,11 @@
 {
   "schemaVersion": 1,
-  "id": "omarchy.monitor",
-  "name": "Display",
+  "id": "omadisplay.center",
+  "name": "Centered Display",
   "version": "1.0.0",
-  "author": "Omarchy",
-  "description": "Brightness slider and laptop display controls",
+  "author": "Kylar514",
+  "license": "MIT",
+  "description": "Omarchy display controls in a screen-centered popup",
   "kinds": [
     "bar-widget"
   ],
@@ -12,9 +13,12 @@
     "barWidget": "Panel.qml"
   },
   "barWidget": {
-    "displayName": "Display",
-    "description": "Brightness slider and laptop display controls",
+    "displayName": "Centered Display",
+    "description": "Omarchy display controls in a screen-centered popup",
     "category": "System",
     "allowMultiple": false
+  },
+  "omarchy": {
+    "clonedFrom": "omarchy.monitor"
   }
 }

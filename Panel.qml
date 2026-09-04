@@ -488,8 +488,14 @@ Panel {
     bar: root.bar
     open: root.opened
     focusTarget: keyCatcher
+    centerOnBar: true
     contentWidth: panel.fittedContentWidth(Style.space(380))
-    contentHeight: panel.fittedContentHeight(panelColumn.implicitHeight, Style.space(560))
+    readonly property int centeredContentHeight: Math.round(Math.min(
+      panelColumn.implicitHeight + panel.verticalContentInset,
+      Style.space(560),
+      Math.max(panel.verticalContentInset, panel.screenH - Math.max(panel.margin * 2, panel.barH * 2))))
+    contentHeight: centeredContentHeight
+    gap: Math.max(0, Math.round((panel.screenH - panel.contentHeight) / 2 - panel.barH))
 
     PanelKeyCatcher {
       id: keyCatcher

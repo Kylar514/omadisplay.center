@@ -512,6 +512,9 @@ Panel {
       onActivateRequested: if (root.cursorActive) root.activateCursor()
       onCloseRequested: root.close()
       onTabRequested: function(direction) { root.switchPanel(direction) }
+      onTextKey: function(t) {
+        if (t === "q" || t === "Q") root.close()
+      }
 
       ScrollView {
         id: scrollArea
